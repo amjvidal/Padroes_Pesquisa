@@ -17,7 +17,7 @@ public class WebSearchModel {
     public WebSearchModel(File sourceFile) {
         this.sourceFile = sourceFile;
     }
-    
+
     public void addQueryObserver(QueryObserver queryObserver) {
     addQueryObserver(queryObserver, null);
 }
@@ -37,8 +37,10 @@ public class WebSearchModel {
     }
 
     private void notifyAllObservers(String line) {
-        for (QueryObserver obs : observers) {
-            obs.onQuery(line);
+        for (ObserverRegistration reg : observers) {
+            if (reg.filter == null || reg.filter.accepts(line)){
+                reg.observer.onQuery(line);
+            }
         }
     }
 
