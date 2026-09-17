@@ -3,11 +3,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Perform "web search" (from a  file), notify the interested observers of each query.
+ * Perform "web search" (from a file), notify the interested observers of each
+ * query.
  */
 public class WebSearchModel {
     private final File sourceFile;
-    private final List<QueryObserver> observers = new ArrayList<>();
+    private final List<ObserverRegistration> observers = new ArrayList<>();
 
     public interface QueryObserver {
         void onQuery(String query);
@@ -16,10 +17,14 @@ public class WebSearchModel {
     public WebSearchModel(File sourceFile) {
         this.sourceFile = sourceFile;
     }
+    
+    public void addQueryObserver(QueryObserver queryObserver) {
+    addQueryObserver(queryObserver, null);
+}
 
     public void pretendToSearch() {
         try (BufferedReader br = new BufferedReader(new FileReader(sourceFile))) {
-            while ( true) {
+            while (true) {
                 String line = br.readLine();
                 if (line == null) {
                     break;
@@ -31,13 +36,23 @@ public class WebSearchModel {
         }
     }
 
-    public void addQueryObserver(QueryObserver queryObserver) {
-        observers.add(queryObserver);
-    }
-
     private void notifyAllObservers(String line) {
         for (QueryObserver obs : observers) {
             obs.onQuery(line);
         }
+    }
+
+    private class ObserverRegistration {
+        QueryObserver observer;
+        QueryFilter filter;
+
+        ObserverRegistration(QueryObserver observer, QueryFilter filter) {
+            this.observer = observer;
+            this.filter = filter;
+        }
+    }
+
+    public void addQueryObserver(QueryObserver queryObserver, QueryFilter filter) {
+        observers.add(new ObserverRegistration(queryObserver, filter));
     }
 }
